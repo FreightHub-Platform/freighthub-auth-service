@@ -1,6 +1,8 @@
 package com.freighthub.auth_service.config;
 
 import com.freighthub.auth_service.util.JwtUtils;
+import com.freighthub.auth_service.service.UserService;
+import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,6 +22,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private JwtUtils jwtUtils;
 
+    @Autowired
+    private UserService userService;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -28,7 +33,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (jwt != null && validateJwtToken(jwt)) {
             String username = getUsernameFromJwtToken(jwt);
 
-            UserDetails userDetails = loadUserByUsername(username);
+            UserDetails userDetails = userService.loadUserByUsername(username);
             if (userDetails != null) {
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
@@ -51,17 +56,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private boolean validateJwtToken(String authToken) {
-        // Implement token validation logic
-        return true;
+        try {
+            Jwts.parser().setSigningKey(jwtUtils.getJwtSecret()).parseClaimsJws(authToken);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private String getUsernameFromJwtToken(String token) {
-        // Implement username extraction logic
-        return "username";
-    }
-
-    private UserDetails loadUserByUsername(String username) {
-        // Implement user loading logic
-        return null;
+        return Jwts.parser()
+                .setSigningKey(jwtUtils.getJwtSecret())
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
     }
 }

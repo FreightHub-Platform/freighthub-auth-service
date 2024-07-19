@@ -37,9 +37,10 @@ public class RequestForwardingFilter extends OncePerRequestFilter {
             ResponseEntity<String> backendResponse = restTemplate.exchange(CORE_BACKEND_URL, HttpMethod.valueOf(request.getMethod()), entity, String.class);
 
             response.setStatus(backendResponse.getStatusCodeValue());
+            backendResponse.getHeaders().forEach((key, values) -> values.forEach(value -> response.addHeader(key, value)));
             response.getWriter().write(backendResponse.getBody());
-
+        } else {
+            filterChain.doFilter(request, response);
         }
-
     }
 }

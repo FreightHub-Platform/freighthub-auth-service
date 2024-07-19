@@ -22,16 +22,20 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<User> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
         User user = userService.registerUser(registerRequest);
-        System.out.println(user);
-        System.out.println("User registered successfully");
         return ResponseEntity.ok(user);
     }
 
-
     @PostMapping("/login")
-    public ResponseEntity<String> loginUser(@Valid @RequestBody LoginRequest loginRequest) {
-        User user = userService.loginUser(loginRequest);
-        String token = userService.generateJwtToken(user);
-        return ResponseEntity.ok(token);
+    public ResponseEntity<?> loginUser(@Valid @RequestBody LoginRequest loginRequest) {
+        try {
+            User user = userService.loginUser(loginRequest);
+            String token = userService.generateJwtToken(user);
+            System.out.println(token);
+            System.out.println(user);
+            System.out.println("User logged in");
+            return ResponseEntity.ok(token);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(401).body("Invalid credentials");
+        }
     }
 }
