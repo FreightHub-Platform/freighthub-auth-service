@@ -22,6 +22,8 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<User> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
         User user = userService.registerUser(registerRequest);
+        System.out.println(user);
+        System.out.println("User registered successfully");
         return ResponseEntity.ok(user);
     }
 

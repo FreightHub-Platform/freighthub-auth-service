@@ -4,6 +4,7 @@ import com.freighthub.auth_service.dto.LoginRequest;
 import com.freighthub.auth_service.dto.RegisterRequest;
 import com.freighthub.auth_service.entity.User;
 import com.freighthub.auth_service.repository.UserRepository;
+import com.freighthub.auth_service.util.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,9 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtUtils jwtUtils;
 
     public User registerUser(RegisterRequest registerRequest) {
         User user = new User();
@@ -33,8 +37,7 @@ public class UserService {
     }
 
     public String generateJwtToken(User user) {
-        //implement jwt token generation
-        return "jwtToken";
+        return jwtUtils.generateJwtToken(user.getUsername());
     }
 
 }
