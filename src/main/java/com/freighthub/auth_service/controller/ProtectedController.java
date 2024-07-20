@@ -12,6 +12,10 @@ public class ProtectedController {
 
     @GetMapping
     public String getProtectedData(@AuthenticationPrincipal UserDetails userDetails) {
-        return "Hello, " + userDetails.getUsername() + ". This is a protected endpoint!";
+        try {
+            return "Protected data for user: " + userDetails.getUsername();
+        } catch (NullPointerException e) {
+            return "Protected data";
+        }
     }
 }

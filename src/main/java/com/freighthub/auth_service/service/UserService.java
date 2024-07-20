@@ -10,9 +10,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class UserService implements UserDetailsService {
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+
     @Autowired
     private UserRepository userRepository;
 
@@ -23,6 +27,7 @@ public class UserService implements UserDetailsService {
     private JwtUtils jwtUtils;
 
     public User registerUser(RegisterRequest registerRequest) {
+        logger.info("Registering user: {}", registerRequest.getUsername());
         User user = new User();
         user.setUsername(registerRequest.getUsername());
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
@@ -30,6 +35,7 @@ public class UserService implements UserDetailsService {
     }
 
     public User loginUser(LoginRequest loginRequest) {
+        logger.info("Logging in user: {}", loginRequest.getUsername());
         User user = userRepository.findByUsername(loginRequest.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
         if (passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
@@ -44,6 +50,7 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) {
+        logger.info("Loading user by username: {}", username);
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }

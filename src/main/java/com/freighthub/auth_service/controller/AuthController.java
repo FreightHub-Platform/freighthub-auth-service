@@ -30,9 +30,6 @@ public class AuthController {
         try {
             User user = userService.loginUser(loginRequest);
             String token = userService.generateJwtToken(user);
-            System.out.println(token);
-            System.out.println(user);
-            System.out.println("User logged in");
             return ResponseEntity.ok(token);
         } catch (RuntimeException e) {
             return ResponseEntity.status(401).body("Invalid credentials");

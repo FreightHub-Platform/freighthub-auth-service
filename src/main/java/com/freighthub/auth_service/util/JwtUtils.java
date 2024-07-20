@@ -24,24 +24,6 @@ public class JwtUtils {
                 .signWith(SignatureAlgorithm.HS512, JWT_SECRET)
                 .compact();
     }
-
-    public String getUserNameFromJwtToken(String token) {
-        return Jwts.parser()
-                .setSigningKey(JWT_SECRET)
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
-    }
-
-    public boolean validateJwtToken(String authToken) {
-        try {
-            Jwts.parser().setSigningKey(JWT_SECRET).parseClaimsJws(authToken);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
     public String getJwtSecret() {
         return JWT_SECRET;
     }
