@@ -1,5 +1,7 @@
 package com.freighthub.auth_service.config;
 
+import com.freighthub.auth_service.util.ApiResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,10 +13,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
 
 @Component
 public class RequestForwardingFilter extends OncePerRequestFilter {
@@ -28,24 +33,52 @@ public class RequestForwardingFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        if (request.getRequestURI().startsWith("/api/protected")) {
-            String CORE_BACKEND_URL = CORE_BACKEND + request.getRequestURI().substring("/api".length());
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Authorization", request.getHeader("Authorization"));
 
-            HttpEntity<String> entity = new HttpEntity<>(headers);
+        System.out.println("Request URI: " + request.getRequestURI());
+
+        if (request.getRequestURI().startsWith("/api/auth")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+//        if (request.getRequestURI().startsWith("/api/public")) {
+            String coreBackendUrl = CORE_BACKEND + request.getRequestURI().substring("/api".length());
+            HttpHeaders headers = new HttpHeaders();
+            Collections.list(request.getHeaderNames()).forEach(headerName ->
+                    headers.add(headerName, request.getHeader(headerName)));
+
+            byte[] requestBody = StreamUtils.copyToByteArray(request.getInputStream());
+            HttpMethod method = HttpMethod.valueOf(request.getMethod());
+
+            HttpEntity<byte[]> entity = new HttpEntity<>(requestBody, headers);
+
             try {
-                ResponseEntity<String> backendResponse = restTemplate.exchange(CORE_BACKEND_URL, HttpMethod.valueOf(request.getMethod()), entity, String.class);
+                ResponseEntity<byte[]> backendResponse = restTemplate.exchange(
+                        coreBackendUrl, method, entity, byte[].class);
 
                 response.setStatus(backendResponse.getStatusCodeValue());
-                backendResponse.getHeaders().forEach((key, values) -> values.forEach(value -> response.addHeader(key, value)));
-                response.getWriter().write(backendResponse.getBody());
+
+                for (Map.Entry<String, String> entry : backendResponse.getHeaders().toSingleValueMap().entrySet()) {
+                    response.addHeader(entry.getKey(), entry.getValue());
+                }
+
+                if (backendResponse.hasBody()) {
+                    response.getOutputStream().write(backendResponse.getBody());
+                }
             } catch (Exception e) {
-                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                response.getWriter().write("Error forwarding request to core backend: " + e.getMessage());
+                setErrorResponse(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, response, "Error forwarding request to core backend: " + e.getMessage());
             }
-        } else {
-            filterChain.doFilter(request, response);
-        }
+//        } else {
+//            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+//            response.getWriter().write("Resource not found");
+//        }
     }
+
+    private void setErrorResponse(int status, HttpServletResponse response, String message) throws IOException {
+        response.setStatus(status);
+        response.setContentType("application/json");
+        ApiResponse<String> errorResponse = new ApiResponse<>(status, message);
+        response.getWriter().write(new ObjectMapper().writeValueAsString(errorResponse));
+    }
+
 }
