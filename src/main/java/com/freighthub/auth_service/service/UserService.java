@@ -44,7 +44,7 @@ public class UserService implements UserDetailsService {
         User user = new User();
         user.setUsername(registerRequest.getUsername());
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
-        user.setRole(UserRole.consigner);
+        user.setRole(registerRequest.getRole());
         User savedUser = userRepository.save(user);
 
         // Forward the user to the core backend
