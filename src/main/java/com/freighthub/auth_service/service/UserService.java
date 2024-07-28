@@ -5,13 +5,12 @@ import com.freighthub.auth_service.dto.LoginRequest;
 import com.freighthub.auth_service.dto.RegisterRequest;
 import com.freighthub.auth_service.entity.User;
 import com.freighthub.auth_service.repository.UserRepository;
+import com.freighthub.auth_service.util.ApiResponse;
 import com.freighthub.auth_service.util.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.*;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -73,6 +72,32 @@ public class UserService implements UserDetailsService {
             logger.error("Error forwarding user to core backend: {}", e.getMessage());
         }
     }
+
+    public Integer forwardUserToCoreBackendLogin(UserRole role, int id) {
+        try {
+            String coreBackendUrl = String.format("http://localhost:8081/api/login?role=%s&id=%d", role, id);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+            ResponseEntity<Integer> response = restTemplate.exchange(
+                    coreBackendUrl, HttpMethod.POST, entity, Integer.class);
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                logger.info("Successfully forwarded user to core backend.");
+                return response.getBody();
+            } else {
+                logger.error("Failed to forward user to core backend. Status code: {}", response.getStatusCode());
+                return null;
+            }
+        } catch (Exception e) {
+            logger.error("Error forwarding user to core backend: {}", e.getMessage());
+            return null;
+        }
+    }
+
+
 
     public User loginUser(LoginRequest loginRequest) {
         logger.info("Logging in user: {}", loginRequest.getUsername());
