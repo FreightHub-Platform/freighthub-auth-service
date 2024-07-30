@@ -37,12 +37,11 @@ public class RequestForwardingFilter extends OncePerRequestFilter {
 
         System.out.println("Request URI: " + request.getRequestURI());
 
-        if (request.getRequestURI().startsWith("/api/auth")) {
+        if (shouldNotFilter(request)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-//        if (request.getRequestURI().startsWith("/api/public")) {
         String coreBackendUrl = CORE_BACKEND + request.getRequestURI().substring("/api".length());
         HttpHeaders headers = new HttpHeaders();
         Collections.list(request.getHeaderNames()).forEach(headerName ->
@@ -65,14 +64,16 @@ public class RequestForwardingFilter extends OncePerRequestFilter {
                 response.getWriter().write("");
             }
 
-
         } catch (Exception e) {
             setErrorResponse(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, response, "Error forwarding request to core backend: " + e.getMessage());
         }
-//        } else {
-//            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-//            response.getWriter().write("Resource not found");
-//        }
+
+    }
+
+      @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getRequestURI();
+        return path.startsWith("/api/auth") || path.startsWith("/swagger-ui") || path.startsWith("/v3/api-docs");
     }
 
     private void setErrorResponse(int status, HttpServletResponse response, String message) throws IOException {
