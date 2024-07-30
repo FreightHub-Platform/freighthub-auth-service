@@ -19,6 +19,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -41,35 +42,35 @@ public class RequestForwardingFilter extends OncePerRequestFilter {
             return;
         }
 
-         String coreBackendUrl = CORE_BACKEND + request.getRequestURI().substring("/api".length());
-            HttpHeaders headers = new HttpHeaders();
-            Collections.list(request.getHeaderNames()).forEach(headerName ->
-                    headers.add(headerName, request.getHeader(headerName)));
+        String coreBackendUrl = CORE_BACKEND + request.getRequestURI().substring("/api".length());
+        HttpHeaders headers = new HttpHeaders();
+        Collections.list(request.getHeaderNames()).forEach(headerName ->
+                headers.add(headerName, request.getHeader(headerName)));
 
-            byte[] requestBody = StreamUtils.copyToByteArray(request.getInputStream());
-            HttpMethod method = HttpMethod.valueOf(request.getMethod());
+        byte[] requestBody = StreamUtils.copyToByteArray(request.getInputStream());
+        HttpMethod method = HttpMethod.valueOf(request.getMethod());
 
-            HttpEntity<byte[]> entity = new HttpEntity<>(requestBody, headers);
+        HttpEntity<byte[]> entity = new HttpEntity<>(requestBody, headers);
 
-            try {
-                ResponseEntity<byte[]> backendResponse = restTemplate.exchange(
-                        coreBackendUrl, method, entity, byte[].class);
+        try {
+            ResponseEntity<byte[]> backendResponse = restTemplate.exchange(
+                    coreBackendUrl, method, entity, byte[].class);
+            response.setStatus(backendResponse.getStatusCodeValue());
+            response.setContentType("application/json");
 
-                response.setStatus(backendResponse.getStatusCodeValue());
-
-                for (Map.Entry<String, String> entry : backendResponse.getHeaders().toSingleValueMap().entrySet()) {
-                    response.addHeader(entry.getKey(), entry.getValue());
-                }
-
-                if (backendResponse.hasBody()) {
-                    response.getOutputStream().write(backendResponse.getBody());
-                }
-            } catch (Exception e) {
-                setErrorResponse(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, response, "Error forwarding request to core backend: " + e.getMessage());
+            if (backendResponse.getBody() != null) {
+                response.getOutputStream().write(backendResponse.getBody());
+            } else {
+                response.getWriter().write("");
             }
+
+        } catch (Exception e) {
+            setErrorResponse(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, response, "Error forwarding request to core backend: " + e.getMessage());
+        }
+
     }
 
-    @Override
+      @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
         return path.startsWith("/api/auth") || path.startsWith("/swagger-ui") || path.startsWith("/v3/api-docs");

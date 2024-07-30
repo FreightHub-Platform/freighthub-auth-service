@@ -20,4 +20,13 @@ public class ApiResponse<T> {
         this.statusCode = statusCode;
         this.message = message;
     }
+
+    @Override
+    public String toString() {
+        return "ApiResponse{" +
+                "status=" + statusCode +
+                ", message='" + message + '\'' +
+                ", data=" + data +
+                '}';
+    }
 }
