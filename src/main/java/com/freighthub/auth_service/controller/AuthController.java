@@ -60,6 +60,7 @@ public class AuthController {
             Map<String, Object> responseData = new HashMap<>();
             responseData.put("token", token);
             responseData.put("role", user.getRole());
+            responseData.put("id", user.getId());
             if (completion != null) {
                 responseData.put("completion", completion);
             }
