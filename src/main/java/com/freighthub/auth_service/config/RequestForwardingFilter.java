@@ -37,12 +37,23 @@ public class RequestForwardingFilter extends OncePerRequestFilter {
 
         System.out.println("Request URI: " + request.getRequestURI());
 
+
         if (shouldNotFilter(request)) {
             filterChain.doFilter(request, response);
             return;
         }
 
+        String queryString = request.getQueryString();
+        // String coreBackendUrl = CORE_BACKEND + request.getRequestURI().substring("/api".length());
+
+        // Construct the core backend URL and append the query string if it exists
+
         String coreBackendUrl = CORE_BACKEND + request.getRequestURI().substring("/api".length());
+        if (queryString != null && !queryString.isEmpty()) {
+            coreBackendUrl += "?" + queryString;
+        }
+
+        System.out.println("Forwarding request to core backend: " + coreBackendUrl);
         HttpHeaders headers = new HttpHeaders();
         Collections.list(request.getHeaderNames()).forEach(headerName ->
                 headers.add(headerName, request.getHeader(headerName)));
