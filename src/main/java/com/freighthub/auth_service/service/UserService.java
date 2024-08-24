@@ -48,6 +48,20 @@ public class UserService implements UserDetailsService {
         user.setRole(registerRequest.getRole());
         User savedUser = userRepository.save(user);
 
+        System.out.println(registerRequest.getFName());
+
+        if (registerRequest.getFName() != null) {
+            savedUser.setFName(registerRequest.getFName());
+            user.setFName(registerRequest.getFName());
+        }
+
+        if (registerRequest.getLName() != null) {
+            savedUser.setLName(registerRequest.getLName());
+        }
+
+        System.out.println(savedUser.getFName());
+        System.out.println(user.getFName());
+
         // Forward the user to the core backend
         forwardUserToCoreBackend(savedUser);
 

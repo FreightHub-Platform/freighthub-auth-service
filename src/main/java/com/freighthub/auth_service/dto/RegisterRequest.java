@@ -6,9 +6,11 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
+
 @Getter
 @Setter
-public class RegisterRequest {
+public class RegisterRequest implements Serializable {
     @NotBlank
     private String username;
 
@@ -17,4 +19,8 @@ public class RegisterRequest {
 
     @NotNull
     private UserRole role;
+
+    private String fName;
+
+    private String lName;
 }

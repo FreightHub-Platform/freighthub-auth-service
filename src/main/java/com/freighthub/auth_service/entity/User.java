@@ -34,11 +34,17 @@ public class User implements UserDetails {
     @Column(name = "role", nullable = false, columnDefinition = "user_role")
     private UserRole role;
 
+    // Fields that are not persisted in the database
+    @Transient
+    private String fName;
+
+    @Transient
+    private String lName;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.name().toUpperCase()));
     }
-
 
     @Override
     public boolean isAccountNonExpired() {
