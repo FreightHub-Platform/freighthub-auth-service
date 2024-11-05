@@ -1,5 +1,6 @@
 package com.freighthub.auth_service.controller;
 
+import com.freighthub.auth_service.dto.CoreBackendResponseDto;
 import com.freighthub.auth_service.dto.LoginRequest;
 import com.freighthub.auth_service.dto.RegisterRequest;
 import com.freighthub.auth_service.entity.User;
@@ -50,19 +51,20 @@ public class AuthController {
 
             logger.info("User: {}", user.getRole());
 
-            Integer completion = null;
+            CoreBackendResponseDto coreResponse = null;
             if (user.getRole() == UserRole.consigner || user.getRole() == UserRole.fleet_owner || user.getRole() == UserRole.driver) {
-                completion = userService.forwardUserToCoreBackendLogin(user.getRole(), user.getId());
+                 coreResponse = userService.forwardUserToCoreBackendLogin(user.getRole(), user.getId());
             }
 
-            logger.info("Completion: {}", completion);
+            logger.info("Completion: {}", coreResponse);
 
             Map<String, Object> responseData = new HashMap<>();
             responseData.put("token", token);
             responseData.put("role", user.getRole());
             responseData.put("id", user.getId());
-            if (completion != null) {
-                responseData.put("completion", completion);
+            if (coreResponse != null) {
+                responseData.put("completion", coreResponse.getCompletion());
+                responseData.put("verifyStatus", coreResponse.getVerifyStatus());
             }
 
             ApiResponse<Map<String, Object>> response = new ApiResponse<>(HttpStatus.OK.value(), "Login successful", responseData);
