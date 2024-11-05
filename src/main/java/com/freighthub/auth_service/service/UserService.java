@@ -1,4 +1,5 @@
 package com.freighthub.auth_service.service;
+import com.freighthub.auth_service.dto.CoreBackendResponseDto;
 import com.freighthub.auth_service.enums.UserRole;
 
 import com.freighthub.auth_service.dto.LoginRequest;
@@ -89,7 +90,7 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    public Integer forwardUserToCoreBackendLogin(UserRole role, int id) {
+    public CoreBackendResponseDto forwardUserToCoreBackendLogin(UserRole role, int id) {
         try {
             String coreBackendUrl = String.format("http://localhost:8081/api/login?role=%s&id=%d", role, id);
             HttpHeaders headers = new HttpHeaders();
@@ -97,8 +98,8 @@ public class UserService implements UserDetailsService {
 
             HttpEntity<Void> entity = new HttpEntity<>(headers);
 
-            ResponseEntity<Integer> response = restTemplate.exchange(
-                    coreBackendUrl, HttpMethod.POST, entity, Integer.class);
+            ResponseEntity<CoreBackendResponseDto> response = restTemplate.exchange(
+                    coreBackendUrl, HttpMethod.POST, entity, CoreBackendResponseDto.class);
 
             if (response.getStatusCode().is2xxSuccessful()) {
                 logger.info("Successfully forwarded user to core backend.");
@@ -112,6 +113,7 @@ public class UserService implements UserDetailsService {
             return null;
         }
     }
+
 
 
 
