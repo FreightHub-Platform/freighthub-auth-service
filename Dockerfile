@@ -1,0 +1,1 @@
+#Docker file for running the spirng boot application for freight hub auth service  
