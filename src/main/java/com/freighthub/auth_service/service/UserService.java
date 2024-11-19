@@ -1,4 +1,5 @@
 package com.freighthub.auth_service.service;
+import com.freighthub.auth_service.dto.ChangePwDto;
 import com.freighthub.auth_service.dto.CoreBackendResponseDto;
 import com.freighthub.auth_service.enums.UserRole;
 
@@ -8,6 +9,7 @@ import com.freighthub.auth_service.entity.User;
 import com.freighthub.auth_service.repository.UserRepository;
 import com.freighthub.auth_service.util.ApiResponse;
 import com.freighthub.auth_service.util.JwtUtils;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -68,6 +70,7 @@ public class UserService implements UserDetailsService {
 
         return savedUser;
     }
+
 
     private void forwardUserToCoreBackend(User user) {
         try {
@@ -136,5 +139,16 @@ public class UserService implements UserDetailsService {
         logger.info("Loading user by username: {}", username);
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    @Transactional
+    public User changePassword(@Valid ChangePwDto changePwDto) {
+        User user = userRepository.findById(Long.valueOf(changePwDto.getId()))
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        if (passwordEncoder.matches(changePwDto.getOldPassword(), user.getPassword())) {
+            user.setPassword(passwordEncoder.encode(changePwDto.getNewPassword()));
+            return userRepository.save(user);
+        }
+        throw new RuntimeException("Invalid credentials");
     }
 }

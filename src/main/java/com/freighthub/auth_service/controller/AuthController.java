@@ -1,5 +1,6 @@
 package com.freighthub.auth_service.controller;
 
+import com.freighthub.auth_service.dto.ChangePwDto;
 import com.freighthub.auth_service.dto.CoreBackendResponseDto;
 import com.freighthub.auth_service.dto.LoginRequest;
 import com.freighthub.auth_service.dto.RegisterRequest;
@@ -35,6 +36,18 @@ public class AuthController {
         try {
             User user = userService.registerUser(registerRequest);
             ApiResponse<User> response = new ApiResponse<>(HttpStatus.OK.value(), "User registered successfully", user);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            ApiResponse<User> response = new ApiResponse<>(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+    }
+
+    @PostMapping("/change_pw")
+    public ResponseEntity<ApiResponse<?>> changePassword(@Valid @RequestBody ChangePwDto changePwDto) {
+        try {
+            User user = userService.changePassword(changePwDto);
+            ApiResponse<User> response = new ApiResponse<>(HttpStatus.OK.value(), "Password changed successfully", user);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             ApiResponse<User> response = new ApiResponse<>(HttpStatus.BAD_REQUEST.value(), e.getMessage());
