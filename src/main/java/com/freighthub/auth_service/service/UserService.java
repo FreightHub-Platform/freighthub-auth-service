@@ -95,7 +95,7 @@ public class UserService implements UserDetailsService {
 
     public CoreBackendResponseDto forwardUserToCoreBackendLogin(UserRole role, int id) {
         try {
-            String coreBackendUrl = String.format("http://api.freighthub.danujaya.live/api/login?role=%s&id=%d", role,
+            String coreBackendUrl = String.format("https://api.freighthub.danujaya.live/api/login?role=%s&id=%d", role,
                     id);
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
