@@ -1,4 +1,5 @@
 package com.freighthub.auth_service.service;
+
 import com.freighthub.auth_service.dto.ChangePwDto;
 import com.freighthub.auth_service.dto.CoreBackendResponseDto;
 import com.freighthub.auth_service.enums.UserRole;
@@ -71,7 +72,6 @@ public class UserService implements UserDetailsService {
         return savedUser;
     }
 
-
     private void forwardUserToCoreBackend(User user) {
         try {
             String coreBackendUrl = CORE_BACKEND + "/register";
@@ -95,7 +95,8 @@ public class UserService implements UserDetailsService {
 
     public CoreBackendResponseDto forwardUserToCoreBackendLogin(UserRole role, int id) {
         try {
-            String coreBackendUrl = String.format("http://localhost:8081/api/login?role=%s&id=%d", role, id);
+            String coreBackendUrl = String.format("http://api.freighthub.danujaya.live/api/login?role=%s&id=%d", role,
+                    id);
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -116,9 +117,6 @@ public class UserService implements UserDetailsService {
             return null;
         }
     }
-
-
-
 
     public User loginUser(LoginRequest loginRequest) {
         logger.info("Logging in user: {}", loginRequest.getUsername());
