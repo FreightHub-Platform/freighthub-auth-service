@@ -16,4 +16,4 @@ COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
 
 # Set default config location to /config
-ENTRYPOINT ["java", "-jar", "app.jar", "--spring.config.location=classpath:/application.properties,/config/application.properties"]
+ENTRYPOINT ["java", "-jar", "app.jar", "--spring.config.location=classpath:/application.properties,/config/application.properties,/config/application-secrets.properties"]
