@@ -148,7 +148,8 @@ public class UserService implements UserDetailsService {
         if (passwordEncoder.matches(changePwDto.getOldPassword(), user.getPassword())) {
             user.setPassword(passwordEncoder.encode(changePwDto.getNewPassword()));
             return userRepository.save(user);
+        } else {
+            throw new RuntimeException("Invalid password");
         }
-        throw new RuntimeException("Invalid credentials");
     }
 }
