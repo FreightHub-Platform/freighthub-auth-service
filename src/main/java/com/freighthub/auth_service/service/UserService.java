@@ -62,6 +62,14 @@ public class UserService implements UserDetailsService {
             savedUser.setLName(registerRequest.getLName());
         }
 
+        if (registerRequest.getMobileNumber() != null) {
+            savedUser.setMobileNumber(registerRequest.getMobileNumber());
+        }
+
+        if (registerRequest.getName() != null) {
+            savedUser.setName(registerRequest.getName());
+        }
+
         System.out.println(savedUser.getFName());
         System.out.println(user.getFName());
 
