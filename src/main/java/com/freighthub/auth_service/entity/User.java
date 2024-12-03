@@ -41,6 +41,12 @@ public class User implements UserDetails {
     @Transient
     private String lName;
 
+    @Transient
+    private String mobileNumber;
+
+    @Transient
+    private String name;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.name().toUpperCase()));

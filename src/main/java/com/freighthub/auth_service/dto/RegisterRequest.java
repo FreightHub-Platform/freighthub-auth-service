@@ -23,4 +23,8 @@ public class RegisterRequest implements Serializable {
     private String fName;
 
     private String lName;
+
+    private String mobileNumber;
+
+    private String name;
 }
